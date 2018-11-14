@@ -24,13 +24,6 @@ void generate() {
 	}
 }
 
-void swap(int* a, int *b) {
-	int tmp;
-	tmp = *a;
-	*a = *b;
-	*b = tmp;
-}
-
 #define find 1
 #define notfind 0
 void fifo(int MAX_NUM) {
@@ -121,6 +114,55 @@ void lru(int MAX_NUM) {
 	printf("lru命中率 %f\n", (float)count/320.0);
 }
 
+void optimal(int MAX_NUM) {
+	int list[32];
+	for (int i=0; i<32; i++)
+		list[i] = -1;
+	int page;
+	int flag = notfind;
+	int count = 0;
+	int range = 0;
+
+	for (int n=0; n<320; n++) {
+		page = ins[n] / 1000;
+		for (int i=0; i<MAX_NUM; i++) {
+			if (page==list[i])
+				flag = find;
+		}
+		if (flag==find) {
+			count++;
+			flag = notfind;
+			continue;
+		} else {
+			if (range < MAX_NUM) {
+				list[range] = page;
+				range++;
+			} else {
+				int maxpos = 0;
+				int maxpage = 0;
+				for (int cur=0; cur<range; cur++) {
+					int f = 0;
+					for (f=n+1; f<320; f++) {
+						if (list[cur]==ins[f]/1000) {
+							if (maxpage<f) {
+								maxpage = f;
+								maxpos = cur;
+							}
+							break;
+						}
+					}
+					if (f==320) {
+						maxpos = cur;
+						maxpage = f;
+					}
+				}
+				list[maxpos]=page;
+			}
+		}
+	}
+	printf("optimal命中率 %f\n", (float)count/320.0);
+}
+
 int main() {
 	generate();
 	printf("请输入分配用户内存数\n");
@@ -128,5 +170,6 @@ int main() {
 	scanf("%d", &MAX_NUM);
 	fifo(MAX_NUM);
 	lru(MAX_NUM);
+	optimal(MAX_NUM);
 	return 0;
 }
