@@ -14,26 +14,45 @@ int min(float list[10]) {
     return pos;
 }
 
+int max(int a, int b) {
+	if (a>b)
+		return a;
+	else return b;
+}
+
 //先来先服务
 void f1(char work_name[10],
         float arrive_time[10],
         float work_time[10]) {
     float t_time = 0; //总周转时间
     float tr_time = 0; //总带权周转时间
-    float time_now = 0;
+    float time_now1 = 0;
+    float time_now2 = 0;
+
+    int flag = 1;
 
     printf("作业调度顺序为：\n");
     for (int i=0; i<10; i++) {
         int pos = min(arrive_time);
-        if (time_now < arrive_time[pos])
-            time_now = arrive_time[pos];
         printf("%c ", work_name[pos]);
-
-        time_now += work_time[pos];
-
-        t_time += time_now - arrive_time[pos];
-        tr_time += (time_now - arrive_time[pos])/work_time[pos];
-
+	if (flag){
+		if (time_now1 < arrive_time[pos])
+			time_now1 = arrive_time[pos];
+        	time_now1 += work_time[pos];
+		if (time_now1>time_now2) 
+			flag = 0;
+        	t_time += time_now1 - arrive_time[pos];
+        	tr_time += (time_now1 - arrive_time[pos])/work_time[pos];
+	}
+	else {
+		if (time_now2 < arrive_time[pos])
+			time_now2 = arrive_time[pos];
+		time_now2 += work_time[pos];
+		if (time_now2>time_now1)
+			flag = 1;
+        	t_time += time_now2 - arrive_time[pos];
+        	tr_time += (time_now2 - arrive_time[pos])/work_time[pos];
+	}
         arrive_time[pos] = MAX_TIME;
     }
     printf("\n");
@@ -44,41 +63,78 @@ void f1(char work_name[10],
 void f2(char work_name[10],
         float arrive_time[10],
         float work_time[10]) {
-    float wait_list[10];
+    float wait_list1[10];
     for (int i=0; i<10; i++)
-        wait_list[i] = MAX_TIME;
+        wait_list1[i] = MAX_TIME;
+    float wait_list2[10];
+    for (int i=0; i<10; i++)
+        wait_list2[i] = MAX_TIME;
     float t_time = 0; //总周转时间
     float tr_time = 0; //总带权周转时间
-    float time_now = 0;
+    float time_now1 = 0;
+    float time_now2 = 0;
 
     int pos = 0;
 
     //保证可能出现的作业完成没有作业等待的情况
-    int waiting = 0;
+    int waiting1 = 0;
+    int waiting2 = 0;
+
+    int flag = 1;
 
     printf("作业调度顺序为：\n");
     for (int i=0; i<10; i++) {
-        for (int j=0; j<10; j++) {
-            if (arrive_time[j]<=time_now) {
-                wait_list[j] = work_time[j];
-                waiting = 1;
-            }
-        }
-        if (waiting == 0) {
-            pos = min(arrive_time);
-        } else {
-            pos = min(wait_list);
-            waiting = 0;
-        }
-        printf("%c ", work_name[pos]);
-        time_now += work_time[pos];
+	if (flag){
+		for (int j=0; j<10; j++) {
+			if (arrive_time[j]<=time_now1) {
+				wait_list1[j] = work_time[j];
+				waiting1 = 1;
+			}
+		}
+		if (waiting1 == 0) {
+			pos = min(arrive_time);
+		} else {
+			pos = min(wait_list1);
+			waiting1 = 0;
+		}
+        	printf("%c ", work_name[pos]);
 
-        t_time += time_now - arrive_time[pos];
-        tr_time += (time_now - arrive_time[pos])/work_time[pos];
+		if (time_now1 < arrive_time[pos])
+			time_now1 = arrive_time[pos];
+        	time_now1 += work_time[pos];
+		if (time_now1>time_now2) 
+			flag = 0;
+        	t_time += time_now1 - arrive_time[pos];
+        	tr_time += (time_now1 - arrive_time[pos])/work_time[pos];
+	}
+	else {
+		for (int j=0; j<10; j++) {
+			if (arrive_time[j]<=time_now2) {
+				wait_list2[j] = work_time[j];
+				waiting2 = 1;
+			}
+		}
+		if (waiting2 == 0) {
+			pos = min(arrive_time);
+		} else {
+			pos = min(wait_list2);
+			waiting2 = 0;
+		}
+        	printf("%c ", work_name[pos]);
 
+		if (time_now2 < arrive_time[pos])
+			time_now2 = arrive_time[pos];
+		time_now2 += work_time[pos];
+		if (time_now2>time_now1)
+			flag = 1;
+        	t_time += time_now2 - arrive_time[pos];
+        	tr_time += (time_now2 - arrive_time[pos])/work_time[pos];
+	}
         arrive_time[pos] = MAX_TIME;
         for (int j=0; j<10; j++)
-            wait_list[j] = MAX_TIME;
+            wait_list1[j] = MAX_TIME;
+        for (int j=0; j<10; j++)
+            wait_list2[j] = MAX_TIME;
     }
     printf("\n");
     printf("平均周转时间为: %f\n", t_time/10);
@@ -88,43 +144,82 @@ void f2(char work_name[10],
 void f3(char work_name[10],
         float arrive_time[10],
         float work_time[10]) {
-    float p_list[10];
+    float p_list1[10];
     for (int i=0; i<10; i++)
-        p_list[i] = MAX_TIME;
+        p_list1[i] = MAX_TIME;
+    float p_list2[10];
+    for (int i=0; i<10; i++)
+        p_list2[i] = MAX_TIME;
     float t_time = 0; //总周转时间
     float tr_time = 0; //总带权周转时间
-    float time_now = 0;
+    float time_now1 = 0;
+    float time_now2 = 0;
 
     int pos = 0;
 
     //保证可能出现的作业完成没有作业等待的情况
-    int waiting = 0;
+    int waiting1 = 0;
+    int waiting2 = 0;
+
+    int flag = 1;
 
     printf("作业调度顺序为：\n");
     for (int i=0; i<10; i++) {
-        for (int j=0; j<10; j++) {
-            if (arrive_time[j]<=time_now) {
-                p_list[j] = 1+(time_now-arrive_time[j])/work_time[j];
-                //只写了min函数，响应比低用负数表示
-                p_list[j] = -p_list[j];
-                waiting = 1;
-            }
-        }
-        if (waiting == 0) {
-            pos = min(arrive_time);
-        } else {
-            pos = min(p_list);
-            waiting = 0;
-        }
-        printf("%c ", work_name[pos]);
-        time_now += work_time[pos];
+	    if (flag){
+		    for (int j=0; j<10; j++) {
+			    if (arrive_time[j]<=time_now1) {
+				    p_list1[j] = 1+(time_now1-arrive_time[j])/work_time[j];
+				    //只写了min函数，响应比低用负数表示
+				    p_list1[j] = -p_list1[j];
+				    waiting1 = 1;
+			    }
+		    }
+		    if (waiting1 == 0) {
+			    pos = min(arrive_time);
+		    } else {
+			    pos = min(p_list1);
+			    waiting1 = 0;
+		    }
+		    printf("%c ", work_name[pos]);
 
-        t_time += time_now - arrive_time[pos];
-        tr_time += (time_now - arrive_time[pos])/work_time[pos];
+		    if (time_now1 < arrive_time[pos])
+			    time_now1 = arrive_time[pos];
+		    time_now1 += work_time[pos];
+		    if (time_now1>time_now2) 
+			flag = 0;
+        	t_time += time_now1 - arrive_time[pos];
+        	tr_time += (time_now1 - arrive_time[pos])/work_time[pos];
+	}
+	else {
+		for (int j=0; j<10; j++) {
+			if (arrive_time[j]<=time_now2) {
+				p_list2[j] = 1+(time_now2-arrive_time[j])/work_time[j];
+				//只写了min函数，响应比低用负数表示
+				p_list2[j] = -p_list2[j];
+				waiting2 = 1;
+			}
+		}
+		if (waiting2 == 0) {
+			pos = min(arrive_time);
+		} else {
+			pos = min(p_list2);
+			waiting2 = 0;
+		}
+		printf("%c ", work_name[pos]);
 
+		if (time_now2 < arrive_time[pos])
+			time_now2 = arrive_time[pos];
+		time_now2 += work_time[pos];
+		if (time_now2>time_now1)
+			flag = 1;
+        	t_time += time_now2 - arrive_time[pos];
+        	tr_time += (time_now2 - arrive_time[pos])/work_time[pos];
+	}
         arrive_time[pos] = MAX_TIME;
         for (int j=0; j<10; j++)
-            p_list[j] = MAX_TIME;
+            p_list1[j] = MAX_TIME;
+        for (int j=0; j<10; j++)
+            p_list2[j] = MAX_TIME;
     }
     printf("\n");
     printf("平均周转时间为: %f\n", t_time/10);
